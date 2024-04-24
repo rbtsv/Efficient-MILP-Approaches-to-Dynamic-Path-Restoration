@@ -28,11 +28,13 @@ So, in our tests we consider three models:
 
 ## Description of Test Cases
 
-We based our experiments on the public networks USNET and NSFNET used for the experiments in the field of optical networks (Namely in the paper [Lightpath Management in SDN-Based Elastic Optical Networks With Power Consumption Considerations](https://www.researchgate.net/publication/321952636_Lightpath_Management_in_SDN-Based_Elastic_Optical_Networks_With_Power_Consumption_Considerations?enrichId=rgreq-9930aaf6f78f60cc156a0f4c0091e69c-XXX&enrichSource=Y292ZXJQYWdlOzMyMTk1MjYzNjtBUzo1NzQ2MjQxMjA0Nzk3NDRAMTUxNDAxMjQ3NDM2Ng%3D%3D&el=1_x_3&_esc=publicationCoverPdf) by Yu Xiong et al.).
+Experiments are done in the context of optical networks. We use the public networks USNET and NSFNET that were also used in the paper [Lightpath Management in SDN-Based Elastic Optical Networks With Power Consumption Considerations](https://www.researchgate.net/publication/321952636_Lightpath_Management_in_SDN-Based_Elastic_Optical_Networks_With_Power_Consumption_Considerations?enrichId=rgreq-9930aaf6f78f60cc156a0f4c0091e69c-XXX&enrichSource=Y292ZXJQYWdlOzMyMTk1MjYzNjtBUzo1NzQ2MjQxMjA0Nzk3NDRAMTUxNDAxMjQ3NDM2Ng%3D%3D&el=1_x_3&_esc=publicationCoverPdf) by Yu Xiong et al.).
 
-To obtain non-trivial test-cases we routed paths in a network as follows. We randomly order all pairs of nodes and for each pair $(s,t), s \neq t$ we try to find a path $P$ that connects $s$ and $t$ and another path $R$ that does not share links with $P$. We call $P$ a *main path* and $R$ a *recovery path*. If such paths exist, we route them in the network. For a path $R$ it is allowed to use colors (of links) that are occupied by other recovery paths, but only such of them that are not recovery paths for the main paths that share with $P$ a same link. We repeat the process of path routing until both $P$ and $R$ exist for some pair of nodes $(s,t)$. When the process is finished, we remove all recovery paths from the network. This is how we generate the first kind of test cases.
+To obtain non-trivial test-cases we routed paths in a network using shared path protection as follows. We randomly order all pairs of nodes and for each pair $(s,t), s \neq t$ we try to find a path $P$ that connects $s$ and $t$ and another path $R$ that does not share links with $P$. We call $P$ a *main path* and $R$ a *recovery path*. If such paths exist, we route them in the network. If two main paths do not share a link, then their recovery paths are allowed to share links, (hence, the name `shared' path protection). We repeat the process of path routing until both $P$ and $R$ exist for some pair of nodes $(s,t)$. When the process is finished, we remove all recovery paths from the network. This is how we generate the first kind of test cases.
 
-It is easy to see that in the test cases of the first kind the recovery problem is solvable, since each broken demand has a corresponding recovery path that do not intersect with the main path and no two recovery paths  share the same link as well. So, to obtain test cases of the second kind, we break a link in the test cases of the first kind and route the paths corresponding to the broken demands. Such routing can have links with corresponding feasible and unfeasible test cases.
+It is easy to see that in the test cases of the first kind the recovery problem is solvable, since each broken demand has a corresponding recovery path that do not intersect with the main path and no two recovery paths  share the same link as well. So, to obtain test cases of the second kind, we break a link in the test cases of the first kind and route the paths corresponding to the broken demands. Such routing can have links with corresponding feasible and unfeasible test cases. 
+
+For each routed network, we obtain test sets of the first kind by breaking each link. For the second kind, we need to break 2 links. The first link is the same for all test cases, each other link is chosen as a second link. Hence, the number of test sets of the second kind is exactly 1 more than the number of test sets of the first kind. 
 
 The length of a path is bounded; we denote the upper bound of a demand $d$ by $r_d$ and call it the *reachability  threshold*. The value reachability  threshold depends on a *Modulation Scheme*: 
 
@@ -42,7 +44,7 @@ The length of a path is bounded; we denote the upper bound of a demand $d$ by $r
 
 We considered the modulation schemes from the paper [Lightpath Management in SDN-Based Elastic Optical Networks With Power Consumption Considerations](https://www.researchgate.net/publication/321952636_Lightpath_Management_in_SDN-Based_Elastic_Optical_Networks_With_Power_Consumption_Considerations?enrichId=rgreq-9930aaf6f78f60cc156a0f4c0091e69c-XXX&enrichSource=Y292ZXJQYWdlOzMyMTk1MjYzNjtBUzo1NzQ2MjQxMjA0Nzk3NDRAMTUxNDAxMjQ3NDM2Ng%3D%3D&el=1_x_3&_esc=publicationCoverPdf) by Yu Xiong et al, which also mentions the modulation scheme 16-QAM with the bound 625 km. We do not consider this modulation scheme since this bound is too short for our needs. 
 
-So a test case of the first kind is described by the network and modulation scheme, and a test case of the second kind also depends on a broken link. In each test cases we use the same modulation scheme for each demand, but our method allows consideration of demands with different modulation schemes as well. Even for the chosen approach we have  10 routing schemes and 223 test cases, so it is enough for our analysis.  Our approach of tests generation allowed us to consider the following test cases of the first kind:
+So a test case of the first kind is described by the network and modulation scheme, and a test case of the second kind also depends on a broken link. In each test cases we use the same modulation scheme for each demand, but our method allows consideration of demands with different modulation schemes as well. Even for the chosen approach we have  10 routing schemes and 223 test cases, so it is enough for our analysis.  Our approach of test generation allowed us to consider the following test cases of the first kind:
 
 - **USNET**
 
@@ -51,17 +53,17 @@ So a test case of the first kind is described by the network and modulation sche
   - **8-QAM**
 
 - **NSFNET**
-
   - **BPSK**
   - **QPSK**
 
-  To generate a congested routing with many demands we firstly routed demands of width 1 and then demands for width 4, 2, and 1 as well. So all colors of some links can be occupied by the paths of width 1, and we do not consider the test cases where such links are broken since it is important for our method to have demands of width greater than. So, we consider a link break scenario only for links only for the links that have at least one demand of width greater than 1. Because of that and the small reachability  threshold for  8-QAM modulation, we have only  2 test cases for the routing scheme for USNET-8-QAM. 
+To generate a congested routing with many demands we firstly routed demands of width 1 and then demands for width 4, 2, and 1 as well. So all colors of some links can be occupied by the paths of width 1, and we do not consider the test cases where such links are broken since it is important for our method to have demands of width greater than 1. So, we consider a link break scenario only for links that have at least one demand of width greater than 1. Because of that and the small reachability threshold for 8-QAM modulation, we have only 2 test cases for the routing scheme for USNET-8-QAM. The number of colors in all networks is the same for each link and equals 80.
 
   
 
 ## Overview of the Results
 
-We performed the experiments via two noncommercial MILP solvers: CBC and SCIP. Firstly we provide below the aggregated results:
+We performed the experiments via two noncommercial MILP solvers: CBC and SCIP. 
+Detailed results are available in the Jupyter notebook and the file `Detailed results'. 
 
 ### Number of variables in models
 
@@ -115,6 +117,11 @@ We performed the experiments via two noncommercial MILP solvers: CBC and SCIP. F
 \* Note that it during the trimming it can be proved that the model is infeasible (in the case where there is a demand for which there is no path of the bounded length).
 
 ### Time of computation (in seconds) for CBC
+
+For a few edges, model generation for the Basic and NoTrim models can exceed more than 100 seconds, and these computations are terminated.  The solver's time limit is set to 500 seconds. Thus, if the computation exceeds 500 seconds, it is not completed. 
+
+We also provide the aggregated time metrics above with excluded hard test cases (that take over 100 seconds) in the Jupyter notebook and the file `Detailed results'. Note that the termination of the solver sometimes happens slowly and its runtime can take up to 700 seconds despite the 500 second limit. 
+
 
 #### Maximal Time
 
@@ -212,8 +219,6 @@ We performed the experiments via two noncommercial MILP solvers: CBC and SCIP. F
 | NSFNET-QPSK		  |       12 |   15.32 |     7.02 |      0.24 |
 | NSFNET-QPSK 19.0	 |       11 |    9.58 |     4.12 |      0.13 |
 
-### Conclusions
+### Conclusion
 
-The solver's time limit is set to 500 seconds. Thus, if the computation exceeds 500 seconds, it is not completed. We also provide the aggregated time metrics above with excluded hard test cases (that take over 100 seconds) in the Jupyter notebook with the detailed results. 
-
-So the results show that our trimming technique significantly improves the size of the model and the runtime of the solver. Most test cases are solved using the CBC-solver in less than one second, and the hardest CBC test case takes a few seconds. The SCIP solver is slower on average, but it solves some test cases that are hard for the CBC-solver better for the Basic and NoTrim models. All in all, the Trimmed model has significantly less variables and can be solved by noncommercial solvers a hundred times faster than models without trimming. NoTrim model is faster than Basic model in many cases, but there are also test cases in which solvers solve the Basic model faster and some of them are hard. So by the analysis of the NoTrim model we proved that the main impact of our model is based on the variables excluded via the trimming procedure, but not excluded because the corresponding colors have been occupied. Note that in some cases the infeasibility of the model can be proven during the trimming proces and we met such cases in our dataset.
+The results show that our trimming technique significantly improves the size of the model and the runtime of the solver. Most test cases are solved using the CBC-solver in less than one second, and the hardest CBC test case takes a few seconds. The SCIP solver is slower on average, but it solves some test cases that are hard for the CBC-solver better in case of the Basic and NoTrim models. All in all, the Trimmed model has significantly less variables and can be solved by noncommercial solvers a hundred times faster than models without trimming. The NoTrim model is faster than the Basic model in many cases, but there are also test cases in which solvers solve the Basic model is faster and some of them are hard. So by the analysis of the NoTrim model we proved that the main impact of our model is based on the variables excluded via the trimming procedure, but not excluded because the corresponding colors have been occupied. Note that in some cases the infeasibility of the model can be proven during the trimming process and we met such cases in our dataset.
